@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LapGain Calculator v4.3.0</title>
+<title>LapGain Calculator v4.4.0</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@400;500;600&family=Roboto+Mono:wght@400;500&display=swap');
 
@@ -415,7 +415,7 @@ body {
   <div class="header-inner">
     <div class="logo">
       <span class="logo-lap">Lap</span><span class="logo-gain">Gain</span>
-      <span class="logo-ver">v4.3.0-PRO</span>
+      <span class="logo-ver">v4.4.0-PRO</span>
     </div>
     <div class="header-right">
       <span class="badge badge-sessions">847 SESSIONS</span>
@@ -1006,7 +1006,8 @@ body {
 
 <footer class="footer">
   <span class="footer-logo">LAPGAIN</span>
-  <span>v4.3.0-PRO · LapGain Research Institute · Wrocław 2024</span>
+  <span>v4.4.0 · LapGain Research Institute · Wrocław 2024</span>
+  <span id="buildInfo" style="font-family:var(--mono);font-size:10px;color:var(--text3)"></span>
   <span>© 2024 All rights reserved (łącznie z prawem do kłamstwa)</span>
 </footer>
 
@@ -1138,6 +1139,12 @@ function calculate() {
 }
 
 updateTrackInfo();
+
+const BUILD_VERSION = "v4.4.0";
+const BUILD_COMMIT  = "374ce55";
+const BUILD_DATE    = "2026-05-15";
+document.getElementById("buildInfo").textContent =
+  BUILD_VERSION + " · " + BUILD_COMMIT + " · " + BUILD_DATE;
 </script>
 </body>
 </html>
