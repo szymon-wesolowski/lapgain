@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LapGain Calculator v4.3.0</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@400;500;600&family=Roboto+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg: #0d0d0f;
+  --surface: #141417;
+  --surface2: #1c1c21;
+  --surface3: #252529;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0f0f2;
+  --text2: #9898a8;
+  --text3: #5a5a6a;
+  --accent: #e84c2b;
+  --accent2: #ff6b47;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --blue: #3b82f6;
+  --purple: #a78bfa;
+  --mono: 'Roboto Mono', monospace;
+  --head: 'Barlow Condensed', sans-serif;
+  --body: 'Barlow', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border2);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.logo-lap {
+  font-family: var(--head);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--text);
+  text-transform: uppercase;
+}
+.logo-gain {
+  font-family: var(--head);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.logo-ver {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  margin-left: 10px;
+  letter-spacing: 0.5px;
+}
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  padding: 3px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+.badge-pro { background: var(--accent); color: #fff; }
+.badge-sessions { background: var(--surface3); color: var(--text2); border: 1px solid var(--border2); }
+
+/* LAYOUT */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+/* SECTION */
+.section { margin-bottom: 28px; }
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.section-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 500;
+  min-width: 24px;
+}
+.section-title {
+  font-family: var(--head);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text2);
+}
+.section-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* BIKES */
+.bike-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 8px;
+}
+.bike-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.bike-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--border2);
+  transition: background 0.15s;
+}
+.bike-card:hover { background: var(--surface2); border-color: var(--border2); }
+.bike-card:hover::before { background: var(--text3); }
+.bike-card.selected { background: var(--surface2); border-color: var(--accent); }
+.bike-card.selected::before { background: var(--accent); }
+.bike-name { font-family: var(--head); font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: 0.3px; }
+.bike-spec { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-top: 3px; }
+.bike-class { display: inline-block; margin-top: 6px; font-size: 10px; padding: 2px 7px; background: var(--surface3); color: var(--text2); border-radius: 2px; letter-spacing: 0.5px; font-family: var(--mono); }
+
+/* TRACK */
+.track-select-wrap { position: relative; }
+.track-select-wrap select {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 15px;
+  padding: 10px 14px;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.track-select-wrap select:focus { border-color: var(--accent); }
+.track-select-wrap::after {
+  content: '▾';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3);
+  pointer-events: none;
+  font-size: 13px;
+}
+.track-info-bar {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.track-stat { display: flex; flex-direction: column; }
+.track-stat-label { font-family: var(--mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; }
+.track-stat-val { font-family: var(--mono); font-size: 13px; color: var(--text); font-weight: 500; margin-top: 2px; }
+.track-stat-val.accent { color: var(--accent2); }
+.track-record { margin-left: auto; text-align: right; }
+.track-record .track-stat-label { text-align: right; }
+
+/* MODS */
+.mod-category-label {
+  font-family: var(--head);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 10px 0 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+.mods-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+@media (max-width: 520px) { .mods-grid { grid-template-columns: 1fr; } .bike-grid { grid-template-columns: 1fr; } }
+.mod-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.12s;
+  position: relative;
+}
+.mod-row:hover { background: var(--surface2); border-color: var(--border2); }
+.mod-row.active { background: #1a1208; border-color: var(--amber); }
+.mod-row.active.cat-human { background: #0f1a0f; border-color: var(--green); }
+.mod-check {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border: 1.5px solid var(--border2);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: transparent;
+  margin-top: 1px;
+  transition: all 0.12s;
+}
+.mod-row.active .mod-check { background: var(--amber); border-color: var(--amber); color: #000; }
+.mod-row.active.cat-human .mod-check { background: var(--green); border-color: var(--green); color: #000; }
+.mod-info { flex: 1; min-width: 0; }
+.mod-name { font-family: var(--body); font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
+.mod-gain { font-family: var(--mono); font-size: 12px; color: var(--green); font-weight: 500; margin-top: 2px; }
+.mod-row.active .mod-gain { color: var(--amber); }
+.mod-row.active.cat-human .mod-gain { color: var(--green); }
+.mod-price { font-family: var(--mono); font-size: 10px; color: var(--text3); margin-top: 1px; }
+.mod-note { font-size: 11px; color: var(--text3); font-style: italic; margin-top: 3px; line-height: 1.4; }
+
+/* CALCULATE BUTTON */
+.calc-btn {
+  width: 100%;
+  padding: 14px 20px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--head);
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  margin-top: 8px;
+}
+.calc-btn:hover { background: var(--accent2); }
+.calc-btn:active { transform: scale(0.99); }
+
+/* RESULTS */
+.results {
+  display: none;
+  margin-top: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.results-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  align-items: center;
+  padding: 20px 22px;
+  background: linear-gradient(135deg, #1a1208 0%, var(--surface2) 100%);
+  border-bottom: 1px solid var(--border);
+}
+.hero-label { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.hero-time { font-family: var(--head); font-size: 42px; font-weight: 800; color: var(--accent2); letter-spacing: 1px; line-height: 1; margin-top: 4px; }
+.hero-delta { font-family: var(--mono); font-size: 14px; color: var(--green); margin-top: 4px; }
+.hero-right { text-align: right; }
+.conf-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  background: var(--surface3);
+  color: var(--text2);
+  border: 1px solid var(--border2);
+  display: inline-block;
+  margin-bottom: 6px;
+}
+.hero-improvement { font-family: var(--head); font-size: 28px; font-weight: 700; color: var(--green); }
+.hero-impr-label { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+.metrics-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+@media (max-width: 520px) { .metrics-row { grid-template-columns: repeat(2, 1fr); } .results-hero { grid-template-columns: 1fr; } }
+.metric-cell {
+  padding: 14px 16px;
+  border-right: 1px solid var(--border);
+  text-align: center;
+}
+.metric-cell:last-child { border-right: none; }
+.metric-val { font-family: var(--mono); font-size: 18px; font-weight: 500; }
+.metric-label { font-family: var(--mono); font-size: 9px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; }
+.breakdown-list { padding: 14px 22px; }
+.breakdown-title { font-family: var(--mono); font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.breakdown-item:last-child { border-bottom: none; }
+.breakdown-item-name { color: var(--text2); }
+.breakdown-item-gain { font-family: var(--mono); color: var(--green); font-size: 12px; font-weight: 500; }
+.breakdown-item-price { font-family: var(--mono); color: var(--text3); font-size: 11px; }
+.disclaimer {
+  padding: 14px 22px;
+  background: #160f08;
+  border-top: 1px solid var(--border);
+}
+.disclaimer p {
+  font-size: 11px;
+  color: var(--text3);
+  line-height: 1.7;
+}
+.disclaimer strong { color: var(--amber); }
+.disclaimer a { color: var(--blue); text-decoration: none; }
+
+/* FOOTER */
+.footer {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+}
+.footer-logo { color: var(--accent); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-lap">Lap</span><span class="logo-gain">Gain</span>
+      <span class="logo-ver">v4.3.0-PRO</span>
+    </div>
+    <div class="header-right">
+      <span class="badge badge-sessions">847 SESSIONS</span>
+      <span class="badge badge-pro">PRO</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- BIKE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Motocykl bazowy</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="bike-grid" id="bikeGrid">
+      <div class="bike-card selected" data-bike="r1m" onclick="selectBike(this)">
+        <div class="bike-name">Yamaha R1M</div>
+        <div class="bike-spec">1000cc · 200 KM · 199 kg · RN65</div>
+        <div class="bike-class">Superbike Open</div>
+      </div>
+      <div class="bike-card" data-bike="cbr" onclick="selectBike(this)">
+        <div class="bike-name">Honda CBR1000RR-R SP</div>
+        <div class="bike-spec">1000cc · 217 KM · 201 kg</div>
+        <div class="bike-class">Superbike Open</div>
+      </div>
+      <div class="bike-card" data-bike="s1000rr" onclick="selectBike(this)">
+        <div class="bike-name">BMW S1000RR M</div>
+        <div class="bike-spec">999cc · 210 KM · 193 kg</div>
+        <div class="bike-class">Superbike Open</div>
+      </div>
+      <div class="bike-card" data-bike="panigale" onclick="selectBike(this)">
+        <div class="bike-name">Ducati Panigale V4R</div>
+        <div class="bike-spec">998cc · 240 KM · 193 kg</div>
+        <div class="bike-class">Superbike Open</div>
+      </div>
+      <div class="bike-card" data-bike="zx10rr" onclick="selectBike(this)">
+        <div class="bike-name">Kawasaki ZX-10RR</div>
+        <div class="bike-spec">998cc · 210 KM · 206 kg</div>
+        <div class="bike-class">Superbike Open</div>
+      </div>
+      <div class="bike-card" data-bike="rsv4" onclick="selectBike(this)">
+        <div class="bike-name">Aprilia RSV4 Factory</div>
+        <div class="bike-spec">1099cc · 217 KM · 199 kg</div>
+        <div class="bike-class">Superbike Open</div>
+      </div>
+      <div class="bike-card" data-bike="gsxr" onclick="selectBike(this)">
+        <div class="bike-name">Suzuki GSX-R1000R</div>
+        <div class="bike-spec">999cc · 202 KM · 203 kg</div>
+        <div class="bike-class">Superbike Open</div>
+      </div>
+      <div class="bike-card" data-bike="fireblade" onclick="selectBike(this)">
+        <div class="bike-name">Honda CBR600RR</div>
+        <div class="bike-spec">599cc · 120 KM · 187 kg</div>
+        <div class="bike-class">Supersport 600</div>
+      </div>
+      <div class="bike-card" data-bike="tuono660" onclick="selectBike(this)">
+        <div class="bike-name">Aprilia Tuono 660</div>
+        <div class="bike-spec">659cc · 95 KM · 183 kg</div>
+        <div class="bike-class">Middleweight Naked</div>
+      </div>
+      <div class="bike-card" data-bike="ovalgp2" onclick="selectBike(this)">
+        <div class="bike-name">Oval GP 2</div>
+        <div class="bike-spec">~125cc · ~15 KM · ~90 kg</div>
+        <div class="bike-class">Oval / Grasstrack</div>
+      </div>
+      <div class="bike-card" data-bike="ktm890" onclick="selectBike(this)">
+        <div class="bike-name">KTM 890 Duke R</div>
+        <div class="bike-spec">889cc · 121 KM · 166 kg</div>
+        <div class="bike-class">Naked / Supermoto</div>
+      </div>
+      <div class="bike-card" data-bike="mt09" onclick="selectBike(this)">
+        <div class="bike-name">Yamaha MT-09 SP</div>
+        <div class="bike-spec">890cc · 119 KM · 193 kg</div>
+        <div class="bike-class">Hyper Naked</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRACK -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Tor</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="track-select-wrap">
+      <select id="trackSel" onchange="updateTrackInfo()">
+        <option value="poznan">Tor Poznań — 4 042 m, Polska</option>
+        <option value="pannonia">Pannonia Ring — 4 011 m, Węgry</option>
+        <option value="hungaroring">Hungaroring — 4 381 m, Węgry</option>
+        <option value="brno">Brno Circuit — 5 403 m, Czechy</option>
+        <option value="misano">Misano World Circuit — 4 226 m, Włochy</option>
+        <option value="mugello">Mugello Circuit — 5 245 m, Włochy</option>
+        <option value="spa">Circuit de Spa — 7 004 m, Belgia</option>
+        <option value="nurburgring">Nürburgring GP — 5 137 m, Niemcy</option>
+        <option value="silverstone">Silverstone — 5 891 m, UK</option>
+        <option value="most">AutoMotodromo Most — 4 212 m, Czechy</option>
+        <option value="slovakiaring">Slovakia Ring — 5 922 m, Słowacja</option>
+        <option value="zandvoort">Circuit Zandvoort — 4 307 m, Holandia</option>
+      </select>
+    </div>
+    <div class="track-info-bar" id="trackInfo">
+      <div class="track-stat">
+        <span class="track-stat-label">Długość</span>
+        <span class="track-stat-val" id="ti-len">4 042 m</span>
+      </div>
+      <div class="track-stat">
+        <span class="track-stat-label">Zakrętów</span>
+        <span class="track-stat-val" id="ti-turns">9</span>
+      </div>
+      <div class="track-stat">
+        <span class="track-stat-label">Twój czas ref.</span>
+        <span class="track-stat-val accent" id="ti-ref">2:00.000</span>
+      </div>
+      <div class="track-stat track-record">
+        <span class="track-stat-label">Poborca sezonu</span>
+        <span class="track-stat-val" id="ti-record" style="font-size:11px">Łukasz Z. — 1:54.812</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODS -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Modyfikacje</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="mod-category-label">🔴 Układ hamulcowy</div>
+    <div class="mods-grid">
+      <div class="mod-row" data-gain="1.8" data-price="8500" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Zaciski Brembo GP4-RX (108mm)</div>
+          <div class="mod-gain">−1.8s / okr.</div>
+          <div class="mod-price">~8 500 PLN · pewność: wysoka</div>
+          <div class="mod-note">pod warunkiem że umiesz hamować</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="1.1" data-price="2200" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Klocki Brembo SC hamulcowe</div>
+          <div class="mod-gain">−1.1s / okr.</div>
+          <div class="mod-price">~2 200 PLN · pewność: wysoka</div>
+          <div class="mod-note">byle nie z bazaru</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="0.8" data-price="1800" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Przewody hamulcowe stalowe</div>
+          <div class="mod-gain">−0.8s / okr.</div>
+          <div class="mod-price">~1 800 PLN · pewność: wysoka</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="0.3" data-price="900" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Dźwignia hamulcowa radial master</div>
+          <div class="mod-gain">−0.3s / okr.</div>
+          <div class="mod-price">~900 PLN · pewność: średnia</div>
+          <div class="mod-note">efekt głównie psychologiczny</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="0.5" data-price="3500" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Tarcze hamulcowe Brembo T-Drive 320mm</div>
+          <div class="mod-gain">−0.5s / okr.</div>
+          <div class="mod-price">~3 500 PLN · pewność: wysoka</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mod-category-label" style="margin-top:16px">🟡 Zawieszenie</div>
+    <div class="mods-grid">
+      <div class="mod-row" data-gain="2.5" data-price="18000" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Öhlins ERS TTX25 / TTX36</div>
+          <div class="mod-gain">−2.5s / okr.</div>
+          <div class="mod-price">~18 000 PLN · pewność: bardzo wysoka</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="1.9" data-price="12000" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Sachs RSC / Nitron R3</div>
+          <div class="mod-gain">−1.9s / okr.</div>
+          <div class="mod-price">~12 000 PLN · pewność: wysoka</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="0.6" data-price="3500" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Linkage tylnego zawieszenia (kit)</div>
+          <div class="mod-gain">−0.6s / okr.</div>
+          <div class="mod-price">~3 500 PLN · pewność: średnia</div>
+          <div class="mod-note">wymaga setnego przepisania ustawień</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="0.4" data-price="2200" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Geometria — offset, yoke, podkładki</div>
+          <div class="mod-gain">−0.4s / okr.</div>
+          <div class="mod-price">~2 200 PLN · pewność: wysoka</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="1.0" data-price="800" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Ustawienie zawieszenia przez zawodnika</div>
+          <div class="mod-gain">−1.0s / okr.</div>
+          <div class="mod-price">~800 PLN · pewność: bardzo wysoka</div>
+          <div class="mod-note">najtańszy hardware tego działu</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mod-category-label" style="margin-top:16px">🟠 Opony</div>
+    <div class="mods-grid">
+      <div class="mod-row" data-gain="3.2" data-price="2800" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Slicki Pirelli SC0</div>
+          <div class="mod-gain">−3.2s / okr.</div>
+          <div class="mod-price">~2 800 PLN / kpl · pewność: bardzo wysoka</div>
+          <div class="mod-note">+2h podgrzewania + rozmowa z Wojciechem</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="2.4" data-price="2200" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Bridgestone V02 SC1 / SC2</div>
+          <div class="mod-gain">−2.4s / okr.</div>
+          <div class="mod-price">~2 200 PLN / kpl · pewność: bardzo wysoka</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="1.6" data-price="1800" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Pirelli Diablo Supercorsa SP V4</div>
+          <div class="mod-gain">−1.6s / okr.</div>
+          <div class="mod-price">~1 800 PLN / kpl · pewność: wysoka</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="0.9" data-price="1200" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Dunlop KR106 / KR108</div>
+          <div class="mod-gain">−0.9s / okr.</div>
+          <div class="mod-price">~1 200 PLN / kpl · pewność: wysoka</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="0.4" data-price="6000" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Podgrzewacze opon (tire warmers)</div>
+          <div class="mod-gain">−0.4s / okr.</div>
+          <div class="mod-price">~6 000 PLN / kpl · pewność: wysoka</div>
+          <div class="mod-note">głównie dla slicków, bez nich bez sensu</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mod-category-label" style="margin-top:16px">🔵 Elektronika / ECU</div>
+    <div class="mods-grid">
+      <div class="mod-row" data-gain="1.5" data-price="5500" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Flashing ECU / Power Commander</div>
+          <div class="mod-gain">−1.5s / okr.</div>
+          <div class="mod-price">~5 500 PLN · pewność: wysoka</div>
+          <div class="mod-note">po 3 sesjach dopiero rozumiesz co zrobiłeś</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="0.8" data-price="4200" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Quickshifter up+down (szybki gaz)</div>
+          <div class="mod-gain">−0.8s / okr.</div>
+          <div class="mod-price">~4 200 PLN · pewność: bardzo wysoka</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="1.2" data-price="6800" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Kalibracja TC / cornering ABS</div>
+          <div class="mod-gain">−1.2s / okr.</div>
+          <div class="mod-price">~6 800 PLN · pewność: wysoka</div>
+          <div class="mod-note">jeśli w ogóle to rozumiesz</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="0.5" data-price="3200" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">AiM Solo 2 DL + logowanie CAN</div>
+          <div class="mod-gain">−0.5s / okr.</div>
+          <div class="mod-price">~3 200 PLN · pewność: pośrednia</div>
+          <div class="mod-note">zysk przez wiedzę, nie przez magię</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="0.6" data-price="1500" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Race Studio 3 — analiza kanałów CAN</div>
+          <div class="mod-gain">−0.6s / okr.</div>
+          <div class="mod-price">~1 500 PLN · pewność: wysoka</div>
+          <div class="mod-note">warunek: musisz to przeczytać</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mod-category-label" style="margin-top:16px">⚙️ Podwozie / nadwozie</div>
+    <div class="mods-grid">
+      <div class="mod-row" data-gain="0.9" data-price="6500" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Podnóżki Gilles Tooling TCA</div>
+          <div class="mod-gain">−0.9s / okr.</div>
+          <div class="mod-price">~6 500 PLN · pewność: średnia</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="0.7" data-price="4800" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Tłumik Akrapovič Evo full system</div>
+          <div class="mod-gain">−0.7s / okr.</div>
+          <div class="mod-price">~4 800 PLN · pewność: niska</div>
+          <div class="mod-note">efekt słyszalny po ~150 okrążeniach</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="0.4" data-price="2100" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Zębatka pineapple + łańcuch DID</div>
+          <div class="mod-gain">−0.4s / okr.</div>
+          <div class="mod-price">~2 100 PLN · pewność: wysoka</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="1.4" data-price="3500" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Redukcja masy (liting bolts, carbon)</div>
+          <div class="mod-gain">−1.4s / okr.</div>
+          <div class="mod-price">~3 500 PLN · pewność: niska</div>
+          <div class="mod-note">zakładasz że problem leży w motocyklu</div>
+        </div>
+      </div>
+      <div class="mod-row" data-gain="0.2" data-price="4500" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Owiewki carbon racing (wet weight)</div>
+          <div class="mod-gain">−0.2s / okr.</div>
+          <div class="mod-price">~4 500 PLN · pewność: wątpliwa</div>
+          <div class="mod-note">−3.5 kg, +200% zdjęć na Instagramie</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mod-category-label" style="margin-top:16px">🍳 Czynniki lifestyle'owe — peer-reviewed, metodologia zastrzeżona</div>
+    <div class="mods-grid">
+      <div class="mod-row cat-human" data-gain="3.8" data-price="28" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Solidne śniadanie przed sesją (jajka + owsianka)</div>
+          <div class="mod-gain">−3.8s / okr.</div>
+          <div class="mod-price">~28 PLN · pewność: naukowo potwierdzona</div>
+          <div class="mod-note">wzrost glikemii = lepsza reakcja na hamowanie w zakręcie 3</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="-2.1" data-price="45" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Kebab tuż przed wyjazdem na tor</div>
+          <div class="mod-gain">+2.1s / okr. ⚠️ STRATA</div>
+          <div class="mod-price">~45 PLN · pewność: boleśnie wysoka</div>
+          <div class="mod-note">efekt uboczny: emergency pit stop, lap 3</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="1.2" data-price="0" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Dobry sen (8h) noc przed trackday</div>
+          <div class="mod-gain">−1.2s / okr.</div>
+          <div class="mod-price">GRATIS · pewność: bardzo wysoka</div>
+          <div class="mod-note">alternatywnie: YouTube do 3 w nocy "jak jeździ Marquez"</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="-3.5" data-price="0" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Kłótnia z żoną rano (o wydatki na moto)</div>
+          <div class="mod-gain">+3.5s / okr. ⚠️ STRATA</div>
+          <div class="mod-price">GRATIS (kosztuje w innych wymiarach)</div>
+          <div class="mod-note">rozproszenie uwagi koreluje z T3 entry error 94%</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="0.7" data-price="12" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Kawa przed sesją (podwójne espresso)</div>
+          <div class="mod-gain">−0.7s / okr.</div>
+          <div class="mod-price">~12 PLN · pewność: wysoka</div>
+          <div class="mod-note">po 3 kawach: +1.4s — efekt odwrócony, ręce drżą</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="0.4" data-price="0" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Odpowiednia playlista w trasie na tor</div>
+          <div class="mod-gain">−0.4s / okr.</div>
+          <div class="mod-price">GRATIS (Spotify) · pewność: subiektywna</div>
+          <div class="mod-note">najlepszy wynik: Rammstein. Najgorszy: smooth jazz</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="2.2" data-price="350" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Wizualizacja okrążenia przed sesją (sport psycho)</div>
+          <div class="mod-gain">−2.2s / okr.</div>
+          <div class="mod-price">~350 PLN / sesja · pewność: wysoka</div>
+          <div class="mod-note">warunek: faktycznie wyobrażasz tor, nie nowe owiewki</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="-1.0" data-price="0" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Gadanie z kolegami w garażu zamiast jazdy</div>
+          <div class="mod-gain">+1.0s / okr. ⚠️ STRATA</div>
+          <div class="mod-price">GRATIS · pewność: certyfikowana</div>
+          <div class="mod-note">−1 sesja, +∞ historii o "jak to kiedyś jeździłem"</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="0.9" data-price="8" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Banan 30 min przed sesją (potas + glukoza)</div>
+          <div class="mod-gain">−0.9s / okr.</div>
+          <div class="mod-price">~8 PLN (3 banany) · pewność: dietetycznie uzasadniona</div>
+          <div class="mod-note">autoryzowany suplement klasy B wg. LapGain Nutrition Dept.</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="0.2" data-price="240" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Nowe skarpetki (techniczne, compression)</div>
+          <div class="mod-gain">−0.2s / okr.</div>
+          <div class="mod-price">~240 PLN · pewność: wątpliwa</div>
+          <div class="mod-note">efekt głównie na stopę prawą w T-bend exit</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="-4.0" data-price="180" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Alkohol poprzedniego wieczoru (impreza)</div>
+          <div class="mod-gain">+4.0s / okr. ⚠️ STRATA KRYTYCZNA</div>
+          <div class="mod-price">~180 PLN (piąteczek) · pewność: absolutna</div>
+          <div class="mod-note">algorytm odmawia dalszej analizy tej sesji</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="0.5" data-price="0" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Szczęśliwa kurtka / talizman dobrego okrążenia</div>
+          <div class="mod-gain">−0.5s / okr.</div>
+          <div class="mod-price">GRATIS · pewność: metodologicznie niesprawdzalna</div>
+          <div class="mod-note">n=1, brak grupy kontrolnej, p=¯\_(ツ)_/¯</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mod-category-label" style="margin-top:16px">🧠 Czynnik ludzki — najbardziej niedoceniana kategoria</div>
+    <div class="mods-grid">
+      <div class="mod-row cat-human" data-gain="8.5" data-price="12000" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Coaching / szkolenie z prowadzącym</div>
+          <div class="mod-gain">−8.5s / okr.</div>
+          <div class="mod-price">~12 000 PLN / sezon · pewność: ekstremalnie wysoka</div>
+          <div class="mod-note">najtańszy koszt na sekundę, nikt nie kupuje</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="4.2" data-price="0" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Analiza danych z poprzedniej sesji</div>
+          <div class="mod-gain">−4.2s / okr.</div>
+          <div class="mod-price">GRATIS · pewność: bardzo wysoka</div>
+          <div class="mod-note">wymaga rezygnacji z ego (wysoka bariera)</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="2.0" data-price="500" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Notatki z pracy z gazem (on-track journal)</div>
+          <div class="mod-gain">−2.0s / okr.</div>
+          <div class="mod-price">~500 PLN (notatnik) · pewność: wysoka</div>
+        </div>
+      </div>
+      <div class="mod-row cat-human" data-gain="0.1" data-price="800" onclick="toggleMod(this)">
+        <div class="mod-check">✓</div>
+        <div class="mod-info">
+          <div class="mod-name">Naklejki Carbon Look + nowy hełm</div>
+          <div class="mod-gain">−0.1s / okr.</div>
+          <div class="mod-price">~800 PLN · pewność: wątpliwa</div>
+          <div class="mod-note">efekt naukowy = rozmowy w garażu ×300%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="calc-btn" onclick="calculate()">▶ Oblicz zysk na okrążeniu</button>
+
+  <!-- RESULTS -->
+  <div class="results" id="results">
+    <div class="results-hero">
+      <div>
+        <div class="hero-label">Szacowany czas po modyfikacjach</div>
+        <div class="hero-time" id="rTime">—</div>
+        <div class="hero-delta" id="rDelta">—</div>
+      </div>
+      <div class="hero-right">
+        <div class="conf-badge" id="rConf">PEWNOŚĆ MODELU: WYSOKA</div>
+        <div class="hero-improvement" id="rImpr">0.0%</div>
+        <div class="hero-impr-label">poprawa czasu ref.</div>
+      </div>
+    </div>
+    <div class="metrics-row">
+      <div class="metric-cell">
+        <div class="metric-val" id="mGain" style="color:var(--green)">0.0s</div>
+        <div class="metric-label">Łączny zysk</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val" id="mCost" style="color:var(--amber)">0 PLN</div>
+        <div class="metric-label">Koszt całkowity</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val" id="mRatio" style="color:var(--blue)">—</div>
+        <div class="metric-label">PLN / sekunda</div>
+      </div>
+      <div class="metric-cell">
+        <div class="metric-val" id="mCount" style="color:var(--purple)">0</div>
+        <div class="metric-label">Modyfikacji</div>
+      </div>
+    </div>
+    <div class="breakdown-list">
+      <div class="breakdown-title">Zestawienie wybranych modyfikacji</div>
+      <div id="breakdownRows"></div>
+    </div>
+    <div class="disclaimer">
+      <p><strong>⚠️ Zastrzeżenie metodologiczne:</strong> Wartości oparte na syntetycznej bazie danych <em>LapGain Research Institute</em> (Wrocław, 2019–2024, N=847 sesji). Zyski obliczone metodą regresji wieloczynnikowej z korekcją Bayesowską dla zmiennej "ilość lat na torze". Aplikacja nie ponosi odpowiedzialności za stłuczki, przepalone budżety ani kłótnie małżeńskie wywołane zakupem zaciski Brembo. Wyniki mogą różnić się w zależności od pogody, temperatury asfaltu, nastroju opon i aktualnej zawartości konta bankowego. <strong>Wszelkie podobieństwo do rzeczywistości jest całkowicie niezamierzone i statystycznie mało prawdopodobne.</strong></p>
+    </div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <span class="footer-logo">LAPGAIN</span>
+  <span>v4.3.0-PRO · LapGain Research Institute · Wrocław 2024</span>
+  <span>© 2024 All rights reserved (łącznie z prawem do kłamstwa)</span>
+</footer>
+
+<script>
+const tracks = {
+  poznan:      {len:"4 042 m",turns:9, ref:120.000, record:"Łukasz Z. — 1:54.812"},
+  pannonia:    {len:"4 011 m",turns:12,ref:115.000, record:"Ádám K. — 1:51.440"},
+  hungaroring: {len:"4 381 m",turns:14,ref:118.000, record:"Tomáš N. — 1:55.019"},
+  brno:        {len:"5 403 m",turns:21,ref:135.000, record:"Marek W. — 2:10.330"},
+  misano:      {len:"4 226 m",turns:16,ref:122.000, record:"Alessandro G. — 1:57.891"},
+  mugello:     {len:"5 245 m",turns:15,ref:130.000, record:"Filippo M. — 2:05.123"},
+  spa:         {len:"7 004 m",turns:19,ref:165.000, record:"Jan V. — 2:39.445"},
+  nurburgring: {len:"5 137 m",turns:16,ref:128.000, record:"Klaus H. — 2:03.788"},
+  silverstone: {len:"5 891 m",turns:18,ref:140.000, record:"James P. — 2:15.002"},
+  most:        {len:"4 212 m",turns:21,ref:119.000, record:"Petr D. — 1:54.550"},
+  slovakiaring:{len:"5 922 m",turns:22,ref:148.000, record:"Maroš K. — 2:22.115"},
+  zandvoort:   {len:"4 307 m",turns:14,ref:124.000, record:"Pieter V. — 1:59.003"}
+};
+
+function fmtTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = (s % 60).toFixed(3);
+  return m + ":" + (sec < 10 ? "0" : "") + sec;
+}
+
+function updateTrackInfo() {
+  const key = document.getElementById("trackSel").value;
+  const t = tracks[key];
+  document.getElementById("ti-len").textContent = t.len;
+  document.getElementById("ti-turns").textContent = t.turns;
+  document.getElementById("ti-ref").textContent = fmtTime(t.ref);
+  document.getElementById("ti-record").textContent = t.record;
+}
+
+function selectBike(el) {
+  document.querySelectorAll(".bike-card").forEach(c => c.classList.remove("selected"));
+  el.classList.add("selected");
+}
+
+function toggleMod(el) {
+  el.classList.toggle("active");
+}
+
+function calculate() {
+  const key = document.getElementById("trackSel").value;
+  const t = tracks[key];
+  const active = document.querySelectorAll(".mod-row.active");
+  let totalGain = 0, totalCost = 0;
+  const rows = [];
+  active.forEach(m => {
+    const g = parseFloat(m.dataset.gain);
+    const p = parseFloat(m.dataset.price);
+    const name = m.querySelector(".mod-name").textContent;
+    totalGain += g; totalCost += p;
+    rows.push({name, g, p});
+  });
+  const newTime = Math.max(t.ref - totalGain, 55);
+  const pct = ((totalGain / t.ref) * 100).toFixed(1);
+
+  document.getElementById("rTime").textContent = fmtTime(newTime);
+  document.getElementById("rDelta").textContent = "−" + totalGain.toFixed(3) + "s vs. czas referencyjny";
+  document.getElementById("rImpr").textContent = pct + "%";
+  document.getElementById("mGain").textContent = "−" + totalGain.toFixed(1) + "s";
+  document.getElementById("mCost").textContent = totalCost.toLocaleString("pl-PL") + " PLN";
+  document.getElementById("mRatio").textContent = totalGain > 0 ? Math.round(totalCost / totalGain).toLocaleString("pl-PL") : "∞";
+  document.getElementById("mCount").textContent = active.length;
+
+  const ratio = totalGain > 0 ? totalCost / totalGain : 0;
+  let conf = "WYSOKA";
+  if (active.length === 0) conf = "BRAK DANYCH";
+  else if (active.length >= 10) conf = "ASTRONOMICZNIE WYSOKA";
+  else if (ratio > 20000) conf = "PORTFEL: KRYTYCZNY";
+  else if (totalGain < 0) conf = "DIETETYCZNA: UJEMNA";
+  document.getElementById("rConf").textContent = "PEWNOŚĆ MODELU: " + conf;
+
+  let html = "";
+  rows.forEach(r => {
+    const gainColor = r.g >= 0 ? 'var(--green)' : 'var(--accent2)';
+    const gainTxt = r.g >= 0 ? `−${r.g.toFixed(1)}s` : `+${Math.abs(r.g).toFixed(1)}s ⚠️`;
+    html += `<div class="breakdown-item">
+      <span class="breakdown-item-name">${r.name}</span>
+      <span style="display:flex;gap:16px;align-items:center">
+        <span class="breakdown-item-price">${r.p > 0 ? r.p.toLocaleString("pl-PL") + " PLN" : "gratis"}</span>
+        <span class="breakdown-item-gain" style="color:${gainColor}">${gainTxt}</span>
+      </span>
+    </div>`;
+  });
+  if (!html) html = `<div class="breakdown-item"><span class="breakdown-item-name" style="color:var(--text3)">Brak wybranych modyfikacji — wybierz przynajmniej jedną</span></div>`;
+  document.getElementById("breakdownRows").innerHTML = html;
+
+  const res = document.getElementById("results");
+  res.style.display = "block";
+  res.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+updateTrackInfo();
+</script>
+</body>
+</html>
