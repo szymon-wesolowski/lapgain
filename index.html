@@ -138,6 +138,36 @@ body {
   background: var(--border);
 }
 
+/* DRIVER */
+.driver-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 520px) { .driver-row { grid-template-columns: 1fr; } }
+.field-group { display: flex; flex-direction: column; gap: 5px; }
+.field-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+.field-input {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 15px;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+.field-input:focus { border-color: var(--accent); }
+.field-input::placeholder { color: var(--text3); }
+
 /* BIKES */
 .bike-grid {
   display: grid;
@@ -396,10 +426,33 @@ body {
 
 <div class="container">
 
-  <!-- BIKE -->
+  <!-- DRIVER -->
   <div class="section">
     <div class="section-header">
       <span class="section-num">01</span>
+      <span class="section-title">Kierowca</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="driver-row">
+      <div class="field-group">
+        <label class="field-label" for="driverName">Imię / Pseudonim</label>
+        <input class="field-input" id="driverName" type="text" placeholder="np. Marek W." maxlength="40">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="driverWeight">Masa ciała (kg)</label>
+        <input class="field-input" id="driverWeight" type="number" placeholder="np. 78" min="40" max="150" step="1">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="driverExp">Lata na torze</label>
+        <input class="field-input" id="driverExp" type="number" placeholder="np. 3" min="0" max="50" step="1">
+      </div>
+    </div>
+  </div>
+
+  <!-- BIKE -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
       <span class="section-title">Motocykl bazowy</span>
       <div class="section-line"></div>
     </div>
@@ -470,7 +523,7 @@ body {
   <!-- TRACK -->
   <div class="section">
     <div class="section-header">
-      <span class="section-num">02</span>
+      <span class="section-num">03</span>
       <span class="section-title">Tor</span>
       <div class="section-line"></div>
     </div>
@@ -500,8 +553,9 @@ body {
         <span class="track-stat-val" id="ti-turns">9</span>
       </div>
       <div class="track-stat">
-        <span class="track-stat-label">Twój czas ref.</span>
-        <span class="track-stat-val accent" id="ti-ref">2:00.000</span>
+        <span class="track-stat-label">Twój czas ref. (M:SS.mmm)</span>
+        <input id="ti-ref" type="text" placeholder="2:00.000"
+          style="font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent2);background:transparent;border:none;border-bottom:1px solid var(--accent);outline:none;width:90px;padding:2px 0;margin-top:2px;">
       </div>
       <div class="track-stat track-record">
         <span class="track-stat-label">Poborca sezonu</span>
@@ -513,7 +567,7 @@ body {
   <!-- MODS -->
   <div class="section">
     <div class="section-header">
-      <span class="section-num">03</span>
+      <span class="section-num">04</span>
       <span class="section-title">Modyfikacje</span>
       <div class="section-line"></div>
     </div>
@@ -913,6 +967,7 @@ body {
         <div class="hero-label">Szacowany czas po modyfikacjach</div>
         <div class="hero-time" id="rTime">—</div>
         <div class="hero-delta" id="rDelta">—</div>
+        <div id="rDriverInfo" style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:4px;"></div>
       </div>
       <div class="hero-right">
         <div class="conf-badge" id="rConf">PEWNOŚĆ MODELU: WYSOKA</div>
@@ -977,12 +1032,23 @@ function fmtTime(s) {
   return m + ":" + (sec < 10 ? "0" : "") + sec;
 }
 
+function parseRefTime(str) {
+  str = str.trim();
+  const m = str.match(/^(\d+):(\d{1,2})\.(\d{1,3})$/);
+  if (!m) return null;
+  const mins = parseInt(m[1], 10);
+  const secs = parseInt(m[2], 10);
+  const ms   = parseFloat("0." + m[3].padEnd(3,"0"));
+  if (secs >= 60) return null;
+  return mins * 60 + secs + ms;
+}
+
 function updateTrackInfo() {
   const key = document.getElementById("trackSel").value;
   const t = tracks[key];
   document.getElementById("ti-len").textContent = t.len;
   document.getElementById("ti-turns").textContent = t.turns;
-  document.getElementById("ti-ref").textContent = fmtTime(t.ref);
+  document.getElementById("ti-ref").value = fmtTime(t.ref);
   document.getElementById("ti-record").textContent = t.record;
 }
 
@@ -998,6 +1064,16 @@ function toggleMod(el) {
 function calculate() {
   const key = document.getElementById("trackSel").value;
   const t = tracks[key];
+
+  const refInput = document.getElementById("ti-ref").value;
+  const refTime = parseRefTime(refInput);
+  if (refTime === null) {
+    document.getElementById("ti-ref").style.borderBottomColor = "var(--accent)";
+    document.getElementById("ti-ref").focus();
+    alert("Niepoprawny format czasu referencyjnego.\nUżyj formatu M:SS.mmm, np. 2:05.340");
+    return;
+  }
+
   const active = document.querySelectorAll(".mod-row.active");
   let totalGain = 0, totalCost = 0;
   const rows = [];
@@ -1008,11 +1084,25 @@ function calculate() {
     totalGain += g; totalCost += p;
     rows.push({name, g, p});
   });
-  const newTime = Math.max(t.ref - totalGain, 55);
-  const pct = ((totalGain / t.ref) * 100).toFixed(1);
+  const newTime = Math.max(refTime - totalGain, 55);
+  const pct = ((totalGain / refTime) * 100).toFixed(1);
+
+  const driverName = document.getElementById("driverName").value.trim();
+  const driverWeight = document.getElementById("driverWeight").value;
+  const driverExp = document.getElementById("driverExp").value;
+
+  let heroLabel = "Szacowany czas po modyfikacjach";
+  if (driverName) heroLabel = driverName + " — szacowany czas";
+  document.querySelector(".hero-label").textContent = heroLabel;
+
+  let driverInfo = "";
+  if (driverWeight) driverInfo += driverWeight + " kg";
+  if (driverExp) driverInfo += (driverInfo ? " · " : "") + driverExp + " lat na torze";
+  const driverInfoEl = document.getElementById("rDriverInfo");
+  if (driverInfoEl) driverInfoEl.textContent = driverInfo;
 
   document.getElementById("rTime").textContent = fmtTime(newTime);
-  document.getElementById("rDelta").textContent = "−" + totalGain.toFixed(3) + "s vs. czas referencyjny";
+  document.getElementById("rDelta").textContent = "−" + totalGain.toFixed(3) + "s vs. " + fmtTime(refTime) + " (czas ref.)";
   document.getElementById("rImpr").textContent = pct + "%";
   document.getElementById("mGain").textContent = "−" + totalGain.toFixed(1) + "s";
   document.getElementById("mCost").textContent = totalCost.toLocaleString("pl-PL") + " PLN";
